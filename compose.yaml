@@ -1,18 +1,18 @@
 
 services:
-  # Servidor web Nginx
   web:
     image: nginx:1.27-alpine
     container_name: novaharvest_web
     ports:
       - "8080:80"
+      - "8443:443"
     volumes:
       - ./web:/usr/share/nginx/html:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - php
 
-  # Servidor PHP-FPM
   php:
     build: ./php
     container_name: novaharvest_php
@@ -26,9 +26,9 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
-  # Servidor de base de datos MariaDB
   db:
     image: mariadb:11
     container_name: novaharvest_db
@@ -40,7 +40,21 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
       - ./db/novaharvest.sql:/docker-entrypoint-initdb.d/01-novaharvest.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-# Volumen persistente de MariaDB
+  adminer:
+    image: adminer:5
+    container_name: novaharvest_adminer
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   dbdata:
