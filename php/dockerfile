@@ -1,0 +1,6 @@
+
+# Imagen de PHP con PHP-FPM
+FROM php:8.3-fpm-alpine
+
+# Instalar las extensiones necesarias para MariaDB
+RUN docker-php-ext-install pdo_mysql mysqli
