@@ -50,6 +50,8 @@ $version = $consulta->fetchColumn();
     <p>Servidor PHP: <?= $servidor ?></p>
     <p>Versión de MariaDB: <?= $version ?></p>
     <p>Página generada por PHP-FPM</p>
+     <?= $cooperativa = 
+     getenv ('NH_COOPERATIVA');
 </main>
 
 <footer>
